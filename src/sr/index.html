@@ -1,0 +1,922 @@
+<!doctype html>
+
+<style type="text/css">
+.division, .team, .records {
+    margin-left: 20px;
+}
+.team {
+    border-left: 8px solid lightblue;
+    padding-left: 5px;
+}
+.tab-content .tab-pane {
+    padding: 10px;
+}
+#tabs {
+    padding: 10px;
+}
+</style>
+
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="apple-touch-icon" href="apple-touch-icon.png">
+        <!-- Place favicon.ico in the root directory -->
+
+        <link rel="stylesheet" href="css/normalize.css">
+        <link rel="stylesheet" href="css/main.css">
+        <link rel="stylesheet" href="sportradar.css">
+        <script src="js/vendor/modernizr-2.8.3.min.js"></script>
+
+        <script src="util.js"></script>
+
+        <script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
+        <script>window.jQuery || document.write('<script src="js/vendor/jquery-2.2.0.min.js"><\/script>')</script>
+
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" >
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.2.1/mustache.min.js"></script>
+
+        <script src="sportradar.js"></script>
+    </head>
+    <body>
+        <div id="menu">
+            <span class="button" id="hierarchyButton">
+                League Hierarchy
+            </span>
+            <span class="button" id="scheduleButton">
+                Schedule
+            </span>
+            <span class="button" id="standingsButton">
+                Standings
+            </span>
+        </div>
+
+        <div id="tabs">
+            <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active"><a href="#content" aria-controls="home" role="tab" data-toggle="tab">Content</a></li>
+                <li role="presentation"><a href="#other" aria-controls="profile" role="tab" data-toggle="tab">Raw JSON</a></li>
+                <li role="presentation"><a href="#notes" aria-controls="profile" role="tab" data-toggle="tab">Notes</a></li>
+            </ul>
+
+            <div class="tab-content">
+                <div role="tabpanel" class="tab-pane active" id="content">...</div>
+                <div role="tabpanel" class="tab-pane" id="other">
+                    <pre id="raw"></pre>
+                </div>
+                <div role="tabpanel" class="tab-pane" id="notes">
+                    <h1>Notes</h1>
+                    <p>Implemented using the REST API for the NFL located at
+                    <a href="http://developer.sportradar.us/page/NFL_Official">NFL_Official</a>.</p>
+
+                    <table class="table table-condensed table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <th>Daily Change Log</th>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <th>Game Boxscore</th>
+                            <td>JUST JSON</td>
+                        </tr>
+                        <tr>
+                            <th>Game Roster</th>
+                            <td>JUST JSON</td>
+                        </tr>
+                        <tr>
+                            <th>Game Statistics</th>
+                            <td>JUST JSON</td>
+                        </tr>
+                        <tr>
+                            <th>League Hierarchy</th>
+                            <td>IMPLEMENTED</td>
+                        </tr>
+                        <tr>
+                            <th>Play-by-Play</th>
+                            <td>JUST JSON</td>
+                        </tr>
+                        <tr>
+                            <th>Player Profile</th>
+                            <td>IMPLEMENTED</td>
+                        </tr>
+                        <tr>
+                            <th>Schedule</th>
+                            <td>IMPLEMENTED</td>
+                        </tr>
+                        <tr>
+                            <th>Seasonal Statistics</th>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <th>Standings</th>
+                            <td>IMPLEMENTED</td>
+                        </tr>
+                        <tr>
+                            <th>Team Profile</th>
+                            <td>IMPLEMENTED</td>
+                        </tr>
+                        <tr>
+                            <th>Weekly Schedule</th>
+                            <td>-</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <script src="js/plugins.js"></script>
+        <script src="js/main.js"></script>
+
+        <script>
+            function render (res, template) {
+                $("#raw").html (JSON.stringify (res, null, 2));
+                var t = $("#" + template).html ();
+                var c = Mustache.render (t, res);
+                $("#content").html (c);
+            }
+
+            function leagueHierarchy (res) {
+                render (res, 'template');
+                return;
+            }
+
+            function getLeagueHierarchy () {
+                reset ();
+                SR.getLeagueHierarchy (leagueHierarchy);
+                return;
+            }
+
+            function schedule (res) {
+                render (res, 'schedule');
+                return;
+            }
+
+            function getSchedule (e) {
+                reset ();
+                SR.getSchedule(schedule, undefined, { season: undefined });
+                return;
+            }
+
+            function getTeam (id) {
+                SR.getTeamProfile (team, undefined, { team: id });
+                return;
+            }
+
+            function team (res) {
+                render (res, 'teamProfile');
+            }
+
+            function getPlayer (id) {
+                SR.getPlayerProfile (function (res) {
+                    render (res, 'playerProfile');
+                }, undefined, { player: id });
+                return;
+            }
+
+            function getStandings (e) {
+                reset ();
+                SR.getStandings (function (res) {
+                    render (res, 'standings');
+                });
+            }
+
+            function getGameRoster (id) {
+                reset ();
+                SR.getGameRoster (function (res) {
+                    render (res, 'gameRoster');
+                }, undefined, { game: id });
+            }
+
+            function getGameBoxscore (id) {
+                reset ();
+                SR.getGameBoxscore (function (res) {
+                    render (res, 'gameBoxscore');
+                }, undefined, { game: id });
+            }
+
+            function getGameStatistics (id) {
+                reset ();
+                SR.getGameStatistics (function (res) {
+                    render (res, 'gameStatistics');
+                }, undefined, { game: id });
+            }
+
+            function getGamePlayByPlay (id) {
+                reset ();
+                SR.getGamePlayByPlay (function (res) {
+                    render (res, 'gamePlayByPlay');
+                }, undefined, { game: id });
+            }
+
+            function reset () {
+                var img = $("<img>").attr ('src', 'https://www.ashrae.org/iapps_images/spinner.gif');
+                $("#content").html (img);
+                $("#raw").empty ();
+                $('#tabs a:first').tab('show');
+                return;
+            }
+
+            $(document).ready (function () {
+                $("#hierarchyButton").click (getLeagueHierarchy).trigger ('click');
+                $("#scheduleButton").click (getSchedule);
+                $("#standingsButton").click (getStandings);
+            });
+        </script>
+    </body>
+</html>
+
+<script type="text/html" id="gameBoxscore">
+    <h1>Game Boxscore</h1>
+
+    Unimplemented; see JSON.
+</script>
+
+<script type="text/html" id="gamePlayByPlay">
+    <h1>Game Play-by-Play</h1>
+
+    Unimplemented; see JSON.
+</script>
+
+<script type="text/html" id="gameRoster">
+    <h1>Game Roster</h1>
+
+    Unimplemented; see JSON.
+</script>
+
+<script type="text/html" id="gameStatistics">
+    <h1>Game Statistics</h1>
+
+    Unimplemented; see JSON.
+</script>
+
+<script type="text/html" id="playerProfile">
+    <h1>Player Profile: {{name}} </h1>
+
+    <table class="table table-condensed table-bordered">
+        <tbody>
+        <tr>
+            <th>Name</th>
+            <td>
+                {{name}}
+                <a class="link" onclick="getPlayer('{{id}}')">show profile</a>
+            </td>
+        </tr>
+        <tr>
+            <th>Jersey</th>
+            <td>{{jersey}}</td>
+        </tr>
+        <tr>
+            <th>Birth Date</th>
+            <td>{{birth_date}}</td>
+        </tr>
+        <tr>
+            <th>Weight / Height</th>
+            <td>{{weight}} / {{height}}</td>
+        </tr>
+        <tr>
+            <th>Status</th>
+            <td>{{status}}</td>
+        </tr>
+        <tr>
+            <th>Position</th>
+            <td>{{position}}</td>
+        </tr>
+        <tr>
+            <th>Birth Place</th>
+            <td>{{birth_place}}</td>
+        </tr>
+        <tr>
+            <th>High School</th>
+            <td>{{high_school}}</td>
+        </tr>
+        <tr>
+            <th>College</th>
+            <td>{{college}}</td>
+        </tr>
+        <tr>
+            <th>College Conf.</th>
+            <td>{{college_conf}}</td>
+        </tr>
+        {{#draft}}
+        <tr>
+            <th>Draft Year</th>
+            <td>{{year}}</td>
+        </tr>
+        <tr>
+            <th>Draft Round</th>
+            <td>{{round}}</td>
+        </tr>
+        <tr>
+            <th>Draft Number</th>
+            <td>{{number}}</td>
+        </tr>
+        <tr>
+            <th>Draft Team</th>
+            <td>{{team.market}} {{team.name}}</td>
+        </tr>
+        {{/draft}}
+        </tbody>
+    </table>
+
+    <h2>Team</h2>
+
+    <table class="table table-condensed table-bordered">
+        <tbody>
+        {{#team}}
+            <tr>
+                <th>Team</th>
+                <td>{{market}} {{name}}</td>
+            </tr>
+            <tr>
+                <th>Alias</th>
+                <td>{{alias}}</td>
+            </tr>
+        {{/team}}
+        </tbody>
+    </table>
+
+    <h2>Seasons</h2>
+
+    NOTE: See JSON for detailed statstics.
+
+    {{#seasons}}
+    <table class="table table-condensed table-bordered">
+        <thead>
+            <tr>
+                <th>Season {{year}} {{type}}</th>
+                <th>Games Played</th>
+                <th>Games Started</th>
+            </tr>
+        </thead>
+        <tbody>
+        {{#teams}}
+            <tr>
+                <td>{{market}} {{name}} ({{alias}})</td>
+                <td>{{statistics.games_played}}</td>
+                <td>{{statistics.games_started}}</td>
+            </tr>
+        {{/teams}}
+        </tbody>
+    </table>
+
+    {{/seasons}}
+</script>
+
+<script type="text/html" id="teamProfile">
+    <h1>Team Profile: {{market}} {{name}} </h1>
+
+    <table class="table table-condensed table-bordered">
+        <tbody>
+        <tr>
+            <th>Id</th>
+            <td>{{id}}</td>
+        </tr>
+        <tr>
+            <th>Name</th>
+            <td>{{name}}</td>
+        </tr>
+        <tr>
+            <th>Market</th>
+            <td>{{market}}</td>
+        </tr>
+        <tr>
+            <th>Alias</th>
+            <td>{{alias}}</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <h2>Venue</h2>
+
+    {{#venue}}
+    <table class="table table-condensed table-bordered">
+        <tbody>
+        <tr>
+            <th>Id</th>
+            <td>{{id}}</td>
+        </tr>
+        <tr>
+            <th>Name</th>
+            <td>{{name}}</td>
+        </tr>
+        <tr>
+            <th>Alias</th>
+            <td>{{alias}}</td>
+        </tr>
+        <tr>
+            <th>Address</th>
+            <td>{{address}}<br/>{{city}}, {{state}}, {{zip}}<br/>{{country}}</td>
+        </tr>
+        <tr>
+            <th>Market</th>
+            <td>{{market}}</td>
+        </tr>
+        <tr>
+            <th>Roof type</th>
+            <td>{{roof_type}}</td>
+        </tr>
+        <tr>
+            <th>Surface</th>
+            <td>{{surface}}</td>
+        </tr>
+        </tbody>
+    </table>
+    {{/venue}}
+
+    <h2>Division</h2>
+
+    {{#division}}
+    <table class="table table-condensed table-bordered">
+        <tbody>
+        <tr>
+            <th>Id</th>
+            <td>{{id}}</td>
+        </tr>
+        <tr>
+            <th>Name</th>
+            <td>{{name}}</td>
+        </tr>
+        <tr>
+            <th>Alias</th>
+            <td>{{alias}}</td>
+        </tr>
+        </tbody>
+    </table>
+    {{/division}}
+
+    <h2>Conference</h2>
+
+    {{#conference}}
+    <table class="table table-condensed table-bordered">
+        <tbody>
+        <tr>
+            <th>Id</th>
+            <td>{{id}}</td>
+        </tr>
+        <tr>
+            <th>Name</th>
+            <td>{{name}}</td>
+        </tr>
+        <tr>
+            <th>Alias</th>
+            <td>{{alias}}</td>
+        </tr>
+        </tbody>
+    </table>
+    {{/conference}}
+
+    <h2>Coaches</h2>
+
+    <table class="table table-condensed table-bordered">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Position</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#coaches}}
+            <tr>
+                <td>{{id}}</td>
+                <td>
+                    {{full_name}}
+                </td>
+                <td>{{position}}</td>
+            </tr>
+            {{/coaches}}
+        </tbody>
+    </table>
+
+    <h2>Players</h2>
+
+    {{#players}}
+    <h3>Player: {{name}}</h3>
+
+    <table class="table table-condensed table-bordered">
+        <tbody>
+        <tr>
+            <th>Id</th>
+            <td>{{id}}</td>
+        </tr>
+        <tr>
+            <th>Name</th>
+            <td>
+                {{name}}
+                <a class="link" onclick="getPlayer('{{id}}')">show profile</a>
+            </td>
+        </tr>
+        <tr>
+            <th>Jersey</th>
+            <td>{{jersey}}</td>
+        </tr>
+        <tr>
+            <th>Birth Date</th>
+            <td>{{birth_date}}</td>
+        </tr>
+        <tr>
+            <th>Weight / Height</th>
+            <td>{{weight}} / {{height}}</td>
+        </tr>
+        <tr>
+            <th>Status</th>
+            <td>{{status}}</td>
+        </tr>
+        <tr>
+            <th>Position</th>
+            <td>{{position}}</td>
+        </tr>
+        <tr>
+            <th>Birth Place</th>
+            <td>{{birth_place}}</td>
+        </tr>
+        <tr>
+            <th>High School</th>
+            <td>{{high_school}}</td>
+        </tr>
+        <tr>
+            <th>College</th>
+            <td>{{college}}</td>
+        </tr>
+        <tr>
+            <th>College Conf.</th>
+            <td>{{college_conf}}</td>
+        </tr>
+        {{#draft}}
+        <tr>
+            <th>Draft Year</th>
+            <td>{{year}}</td>
+        </tr>
+        <tr>
+            <th>Draft Round</th>
+            <td>{{round}}</td>
+        </tr>
+        <tr>
+            <th>Draft Number</th>
+            <td>{{number}}</td>
+        </tr>
+        <tr>
+            <th>Draft Team</th>
+            <td>{{team.market}} {{team.name}}</td>
+        </tr>
+        {{/draft}}
+        </tbody>
+    </table>
+    {{/players}}
+
+</script>
+
+<script type="text/html" id="standings">
+    <h1>Standings</h1>
+
+    <h2>Season</h2>
+
+    <table class="table table-condensed table-bordered">
+        <tbody>
+        <tr>
+            <th>Id</th>
+            <td>{{season.id}}</td>
+        </tr>
+        <tr>
+            <th>Year</th>
+            <td>{{season.year}}</td>
+        </tr>
+        <tr>
+            <th>Type</th>
+            <td>{{season.type}}</td>
+        </tr>
+        <tr>
+            <th>Name</th>
+            <td>{{season.name}}</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <h2>Week</h2>
+
+    <table class="table table-condensed table-bordered">
+        <tbody>
+        <tr>
+            <th>Id</th>
+            <td>{{week.id}}</td>
+        </tr>
+        <tr>
+            <th>Sequence</th>
+            <td>{{week.sequence}}</td>
+        </tr>
+        <tr>
+            <th>Title</th>
+            <td>{{week.title}}</td>
+        </tr>
+        </tbody>
+    </table>
+
+    {{#conferences}}
+    <h2>Conference: {{name}}</h2>
+
+    {{#divisions}}
+        <h2>Division: {{name}}</h2>
+
+        {{#teams}}
+        <h3>Team: {{market}} {{name}}</h3>
+
+        <table class="table table-condensed table-bordered">
+            <tbody>
+            <tr>
+                <th>Win / Loss / Tie</th>
+                <td>{{wins}} | {{losses}} | {{ties}}</td>
+            </tr>
+            <tr>
+                <th>Points for/against</th>
+                <td>{{points_for}} / {{points_against}}</td>
+            </tr>
+            <tr>
+                <th>Points rank</th>
+                <td>{{points_rank}}</td>
+            </tr>
+            <tr>
+                <th>Touchdown diff</th>
+                <td>{{touchdown_diff}}</td>
+            </tr>
+            <tr>
+                <th>Streak</th>
+                <td>{{streak.desc}}</td>
+            </tr>
+            <tr>
+                <th>Rank Conf/Div</th>
+                <td>{{rank.conference}} | {{rank.division}}</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="records">
+            <h3>Records</h3>
+
+            <table class="table table-condensed table-bordered">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Wins</th>
+                        <th>Losses</th>
+                        <th>Ties</th>
+                        <th>Win %</th>
+                        <th>Points for</th>
+                        <th>Points against</th>
+                        <th>Points Rank</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {{#records}}
+                {{#record}}
+                    <tr>
+                        <td>{{category}}</td>
+                        <td>{{wins}}</td>
+                        <td>{{losses}}</td>
+                        <td>{{ties}}</td>
+                        <td>{{win_pct}}</td>
+                        <td>{{points_for}}</td>
+                        <td>{{points_against}}</td>
+                        <td>{{points_rank}}</td>
+                    </tr>
+                {{/record}}
+                {{/records}}
+                </tbody>
+            </table>
+            </div>
+        </div>
+        {{/teams}}
+    {{/divisions}}
+
+    {{/conferences}}
+
+</script>
+
+<script type="text/html" id="schedule">
+    <h1>Schedule</h1>
+
+    <table class="table table-condensed table-bordered">
+        <tbody>
+        <tr>
+            <th>Id</th>
+            <td>{{id}}</td>
+        </tr>
+        <tr>
+            <th>Year</th>
+            <td>{{year}}</td>
+        </tr>
+        <tr>
+            <th>Type</th>
+            <td>{{type}}</td>
+        </tr>
+        </tbody>
+    </table>
+
+    {{#weeks}}
+    <h2>Week {{sequence}}</h2>
+
+    <table class="table table-condensed table-bordered">
+        <tbody>
+        <tr>
+            <th>Id</th>
+            <td>{{id}}</td>
+        </tr>
+        <tr>
+            <th>Sequence</th>
+            <td>{{sequence}}</td>
+        </tr>
+        <tr>
+            <th>Title</th>
+            <td>{{title}}</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <table class="table table-condensed table-bordered">
+        <thead>
+            <tr>
+                <th>Game</th>
+                <th>Venue</th>
+                <th>Home</th>
+                <th>Away</th>
+                <th>Television</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#games}}
+                <tr>
+                    <td>{{sequence}}</td>
+                    <td>
+                        {{venue.name}}
+                        <a class='link' onclick="getGameRoster('{{id}}')">roster</a>
+                        <a class='link' onclick="getGameStatistics('{{id}}')">stats</a>
+                        <a class='link' onclick="getGameBoxscore('{{id}}')">boxscore</a>
+                        <a class='link' onclick="getGamePlayByPlay('{{id}}')">pbp</a>
+                    </td>
+                    <td>
+                        {{home.name}}
+                        <a class='link' onclick="getTeam('{{home.id}}')">show profile</a>
+                    </td>
+                    <td>
+                        {{away.name}}
+                        <a class='link' onclick="getTeam('{{away.id}}')">show profile</a>
+                    </td>
+                    <td>{{broadcast.network}} | {{broadcast.satellite}}</td>
+                </tr>
+            {{/games}}
+        </tbody>
+    </table>
+    {{/weeks}}
+</script>
+
+<script type="text/html" id="template">
+    <h1>Sports Radar - League Hierarchy</h1>
+
+    <pre>{{_comment}}</pre>
+
+    <h1>League</h1>
+
+    <table class="table table-condensed table-bordered">
+        <tbody>
+            {{#league}}
+            <tr>
+                <th>Id</th>
+                <td>{{id}}</td>
+            </tr>
+            <tr>
+                <th>Name</th>
+                <td>{{name}}</td>
+            </tr>
+            <tr>
+                <th>Alias</th>
+                <td>{{alias}}</td>
+            </tr>
+            {{/league}}
+        </tbody>
+    </table>
+
+    {{#conferences}}
+    <h1>Conference: {{name}}</h1>
+
+    <table class="table table-condensed table-bordered">
+        <tbody>
+        <tr>
+            <th>Id</th>
+            <td>{{id}}</td>
+        </tr>
+        <tr>
+            <th>Name</th>
+            <td>{{name}}</td>
+        </tr>
+        <tr>
+            <th>Alias</th>
+            <td>{{alias}}</td>
+        </tr>
+        </tbody>
+    </table>
+
+    {{#divisions}}
+    <div class="division">
+        <h2>Division: {{name}}</h2>
+        <table class="table table-condensed table-bordered">
+            <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{id}}</td>
+            </tr>
+            <tr>
+                <th>Name</th>
+                <td>{{name}}</td>
+            </tr>
+            <tr>
+                <th>Alias</th>
+                <td>{{alias}}</td>
+            </tr>
+            </tbody>
+        </table>
+
+        {{#teams}}
+        <div class="team">
+            <h2>Team: {{market}} {{name}}</h2>
+            <table class="table table-condensed table-bordered">
+                <tbody>
+                <tr>
+                    <th>Id</th>
+                    <td>
+                        {{id}}
+                        <a class='link' onclick="getTeam('{{id}}')" team-id="{{id}}">show team profile</a>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Name</th>
+                    <td>{{name}}</td>
+                </tr>
+                <tr>
+                    <th>Alias</th>
+                    <td>{{alias}}</td>
+                </tr>
+                <tr>
+                    <th>Market</th>
+                    <td>{{market}}</td>
+                </tr>
+                </tbody>
+            </table>
+
+            {{#venue}}
+            <div class="venue">
+                <h2>Venue: {{name}}</h2>
+                <table class="table table-condensed table-bordered">
+                    <tbody>
+                    <tr>
+                        <th>Id</th>
+                        <td>{{id}}</td>
+                    </tr>
+                    <tr>
+                        <th>Name</th>
+                        <td>{{name}}</td>
+                    </tr>
+                    <tr>
+                        <th>Address</th>
+                        <td>{{address}}<br/>{{city}}, {{state}}, {{zip}}<br/>{{country}}</td>
+                    </tr>
+                    <tr>
+                        <th>Market</th>
+                        <td>{{market}}</td>
+                    </tr>
+                    <tr>
+                        <th>Roof type</th>
+                        <td>{{roof_type}}</td>
+                    </tr>
+                    <tr>
+                        <th>Surface</th>
+                        <td>{{surface}}</td>
+                    </tr>
+
+                    </tbody>
+                </table>
+            </div>
+            {{/venue}}
+        </div>
+        {{/teams}}
+    </div>
+    {{/divisions}}
+
+    {{/conferences}}
+
+
+
+</script>
+

@@ -37,7 +37,7 @@
 
 <script>
     function getPlayers (success, failure) {
-        var url = "https://www.stattleship.com/football/nfl/feats?";
+        var url = "https://www.stattleship.com/football/nfl/scoring_plays?";
         var team = $.getUrlVar ("team_id")
         if (team) {
             url += "team_id=" + team + "&";
@@ -60,6 +60,15 @@
         var success = function (res) {
             $("#raw").html (JSON.stringify (res, null, 2));
             instrument (res);
+
+            console.log (res);
+            _.each (res.scoring_plays, function (obj, i) {
+                obj.scoring_players = [];
+                _.each (obj.scoring_player_ids, function (id, i) {
+                    alert (id);
+                    obj.scoring_players.push (res.mapped.player [id]);
+                });
+            });
 
             var template = $("#divisionsTemplate").html ();
             var content = Mustache.render (template, res);
@@ -97,7 +106,7 @@
 
 <script type="text/html" id="divisionsTemplate">
     <h1>
-        /football/nfl/feats
+        /football/nfl/injuries
     </h1>
 
     <h2>Leagues</h2>
@@ -236,6 +245,45 @@
             <td>{{league.name}}</td>
         </tr>
         {{/winning_teams}}
+        </tbody>
+    </table>
+
+
+    <h2>Opponents</h2>
+
+    <table class="table table-condensed table-bordered">
+        <thead>
+        <tr>
+            <th>Index</th>
+            <th>Team</th>
+            <th>Colors</th>
+            <th>Nickname</th>
+            <th>Location</th>
+            <th>Division</th>
+            <th>League</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#opponents}}
+        <tr>
+            <td>{{index}}.</td>
+            <td>
+                {{name}} ({{slug}})
+                <a class='linkage' href="rosters.html?team_id={{slug}}">
+                    roster
+                </a>
+            </td>
+            <td>
+                {{#colors}}
+                <div style="background-color: #{{.}}" class="color-box"></div>
+                {{/colors}}
+            </td>
+            <td>{{nickname}}</td>
+            <td>{{location}}</td>
+            <td>{{division.name}}</td>
+            <td>{{league.name}}</td>
+        </tr>
+        {{/opponents}}
         </tbody>
     </table>
 
@@ -392,4 +440,100 @@
         </tbody>
     </table>
 
+    <h2>Scoring Players</h2>
+
+    <table class="table table-condensed table-bordered">
+        <thead>
+        <tr>
+            <th>Index</th>
+            <th>Name</th>
+            <th>Role</th>
+            <th>Player</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#scoring_players}}
+        <tr>
+            <td>{{index}}.</td>
+            <td>{{name}}</td>
+            <td>{{role}}</td>
+            <td>{{player.name}}
+                <a class='linkage' href="feats.html?player_id={{slug}}">
+                    feats
+                </a>
+            </td>
+        </tr>
+        {{/scoring_players}}
+        </tbody>
+    </table>
+
+    <h2>Scoring Plays</h2>
+
+    <table class="table table-condensed table-bordered">
+        <thead>
+        <tr>
+            <th>Index</th>
+            <th>Game</th>
+            <th>Team</th>
+            <th>Opponent</th>
+            <th>Players</th>
+            <th>Type</th>
+            <th>Points</th>
+            <th>Conversion</th>
+            <th>Points</th>
+            <th>Quarter</th>
+            <th>Yards</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#scoring_plays}}
+        <tr>
+            <td>{{index}}.</td>
+            <td>{{game.name}}</td>
+            <td>{{team.name}}</td>
+            <td>{{opponent.name}}</td>
+            <td>
+                {{#scoring_player_ids}}
+                {{.}},
+                {{/scoring_player_ids}}
+            </td>
+            <td>{{scoring_type}} ({{scoring_how}})</td>
+            <td>{{points}}</td>
+            <td>{{conversion}}</td>
+            <td>{{conversion_points}}</td>
+            <td>{{period_number}}</td>
+            <td>{{yards}}</td>
+        </tr>
+        {{/scoring_plays}}
+        </tbody>
+    </table>
+
+    {
+    "id": "e2fd81e7-5982-4925-a270-6bfb649a3fe8",
+    "conversion": "xpt-success",
+    "conversion_points": 1,
+    "empty_net": false,
+    "name": "Touchdown",
+    "period_number": 1,
+    "period_seconds": 487,
+    "points": 6,
+    "scored_at": null,
+    "scoring_conversion": null,
+    "scoring_conversion_points": 0,
+    "scoring_how": "pass",
+    "scoring_method": "scoring-play",
+    "scoring_type": "touchdown",
+    "time_code": "PT8M7S",
+    "yards": 7,
+    "game_id": "7623e7f0-1b13-4d55-b648-2b2cc55311d1",
+    "opponent_id": "e6094723-20f3-417a-87d2-1ccc0b7a6388",
+    "team_id": "ecf6a705-7a54-4f36-9dcd-09a0c53e733b",
+    "scoring_player_ids": [
+    "bd199592-19ef-4ffd-b9a2-f72893fef45a",
+    "55138d32-d4d8-4e04-99ef-6297cf4e47a5",
+    "175129a7-516c-4cbf-850f-f216c2cb5379"
+    ]
+    },
+
 </script>
+

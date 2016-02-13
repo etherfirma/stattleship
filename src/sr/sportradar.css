@@ -1,0 +1,28 @@
+body {
+}
+
+#menu {
+    border-bottom: 1px solid gray;
+    padding: 10px 10px;
+}
+.button {
+    border-radius: 8px;
+    padding: 8px 10px;
+    background-color: lightgray;
+    margin-right: 10px;
+}
+.button:hover {
+    background-color: lightgreen;
+}
+
+.link {
+    margin: 3px 4px;
+    background-color: lightgoldenrodyellow;
+    border: 1px solid gray;
+    padding: 3px;
+    border-radius: 3px;
+}
+.link:hover {
+    text-decoration: none;
+    background-color: goldenrod;
+}

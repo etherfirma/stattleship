@@ -37,7 +37,7 @@
 
 <script>
     function getPlayers (success, failure) {
-        var url = "https://www.stattleship.com/football/nfl/feats?";
+        var url = "https://www.stattleship.com/football/nfl/injuries?";
         var team = $.getUrlVar ("team_id")
         if (team) {
             url += "team_id=" + team + "&";
@@ -97,7 +97,7 @@
 
 <script type="text/html" id="divisionsTemplate">
     <h1>
-        /football/nfl/feats
+        /football/nfl/injuries
     </h1>
 
     <h2>Leagues</h2>

@@ -13,6 +13,7 @@ function extract (res, which) {
 
 function instrument (res) {
     var map = [ ];
+    res.map = map;
 
     // Add indexes to the arrays so we can format the tables
 
@@ -28,6 +29,7 @@ function instrument (res) {
     // Map the objects by their id's so we can deference links
 
     var mapped =  { };
+    res.mapped = mapped;
 
     _.each (map, function (which, i) {
         mapped [which] =  extract (res, which);
