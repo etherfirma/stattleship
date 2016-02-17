@@ -2,10 +2,6 @@ SR = {
     apiKey: "k6a43yyq7wbtftzz2ucr5d97",
     apiHost: 'http://localhost:8000',
 
-    hello: function () {
-        alert ('hi');
-    },
-
     fail: function (res) {
         console.log ('fail: ' + res);
         alert (JSON.stringify (res, null, 2));
@@ -44,6 +40,40 @@ SR = {
             .fail (fail || this.fail);
 
         return;
+    },
+
+    getSeasonalStatistics: function (success, fail, opts) {
+        var opts = opts || { };
+        var accessLevel = opts.accessLevel || 'ot';
+        var version = opts.version || 1;
+        var year = opts.year || 2015;
+        var season = opts.season || 'reg';
+        var team = opts.team;
+        var format = opts.format || 'json';
+
+        var url = this.apiHost + '/nfl-' + accessLevel + version + '/seasontd/' + year + '/' + season + '/teams/' + team + '/statistics.' + format;
+        url += '?api_key=' + this.apiKey;
+
+        $.ajax (url)
+            .success (success)
+            .fail (fail || this.fail);
+    },
+
+    getWeeklySchedule: function (success, fail, opts) {
+        var opts = opts || { };
+        var accessLevel = opts.accessLevel || 'ot';
+        var version = opts.version || 1;
+        var year = opts.year || 2015;
+        var season = opts.season || 'REG';
+        var week = opts.week || 1;
+        var format = opts.format || 'json';
+
+        var url = this.apiHost + '/nfl-' + accessLevel + version + '/games/' + year + '/' + season + '/' + week + '/schedule.' + format;
+        url += '?api_key=' + this.apiKey;
+
+        $.ajax (url)
+            .success (success)
+            .fail (fail || this.fail);
     },
 
     getLeagueHierarchy: function (success, fail, opts) {

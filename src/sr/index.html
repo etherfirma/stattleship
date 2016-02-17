@@ -14,6 +14,12 @@
 #tabs {
     padding: 10px;
 }
+#menu {
+    padding: 8px;
+}
+.row {
+    margin-bottom: 20px;
+}
 </style>
 
 <html class="no-js" lang="">
@@ -48,18 +54,34 @@
     </head>
     <body>
         <div id="menu">
-            <span class="button" id="hierarchyButton">
-                League Hierarchy
-            </span>
-            <span class="button" id="scheduleButton">
-                Schedule
-            </span>
-            <span class="button" id="standingsButton">
-                Standings
-            </span>
-            <span style="float: right">
-                Based on http://sportradar.com
-            </span>
+            <div class="row">
+                <span class="button" id="hierarchyButton">
+                    League Hierarchy
+                </span>
+                <span class="button" id="scheduleButton">
+                    Schedule
+                </span>
+                <span class="button" id="standingsButton">
+                    Standings
+                </span>
+                <span style="float: right">
+                    Based on http://sportradar.com
+                </span>
+            </div>
+            <div>
+                <span class="button" id="clevelandButton">
+                    Cleveland Browns
+                </span>
+                <span class="button" id="johnnyButton">
+                    Johnny Manziel
+                </span>
+                <span class="button" id="seasonalButton">
+                    Seasonal Statistics (CB/2015/1/Reg)
+                </span>
+                <span class="button" id="weeklyButton">
+                    Weekly Schedule (2015/1/REG)
+                </span>
+            </div>
         </div>
 
         <div id="tabs">
@@ -121,7 +143,7 @@
                         </tr>
                         <tr>
                             <th>Seasonal Statistics</th>
-                            <td>-</td>
+                            <td>JUST JSON</td>
                         </tr>
                         <tr>
                             <th>Standings</th>
@@ -133,7 +155,7 @@
                         </tr>
                         <tr>
                             <th>Weekly Schedule</th>
-                            <td>-</td>
+                            <td>JUST JSON</td>
                         </tr>
                         </tbody>
                     </table>
@@ -225,6 +247,20 @@
                 }, undefined, { game: id });
             }
 
+            function getSeasonal () {
+                reset ();
+                SR.getSeasonalStatistics (function (res) {
+                    render (res, 'seasonal');
+                }, undefined, { team: "d5a2eb42-8065-4174-ab79-0a6fa820e35e" });
+            }
+
+            function getWeeklySchedule () {
+                reset ();
+                SR.getWeeklySchedule (function (res) {
+                    render (res, 'weekly');
+                }, undefined);
+            }
+
             function reset () {
                 var img = $("<img>").attr ('src', 'https://www.ashrae.org/iapps_images/spinner.gif');
                 $("#content").html (img);
@@ -237,10 +273,31 @@
                 $("#hierarchyButton").click (getLeagueHierarchy).trigger ('click');
                 $("#scheduleButton").click (getSchedule);
                 $("#standingsButton").click (getStandings);
+                $("#seasonalButton").click (getSeasonal);
+                $("#weeklyButton").click (getWeeklySchedule);
+
+                $("#clevelandButton").click (function ()  {
+                    getTeam("d5a2eb42-8065-4174-ab79-0a6fa820e35e");
+                });
+                $("#johnnyButton").click (function () {
+                    getPlayer("7ebbfdef-1185-4896-a323-e6d5669a8345");
+                });
             });
         </script>
     </body>
 </html>
+
+<script type="text/html" id="seasonal">
+    <h1>Seasonal Statistics</h1>
+
+    Unimplemented; see JSON.
+</script>
+
+<script type="text/html" id="weekly">
+    <h1>Weekly Schedule</h1>
+
+    Unimplemented; see JSON.
+</script>
 
 <script type="text/html" id="gameBoxscore">
     <h1>Game Boxscore</h1>
